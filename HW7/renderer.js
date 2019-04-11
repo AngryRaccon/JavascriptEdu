@@ -30,5 +30,12 @@ let renderer = {
         });
 
         this.cells[`x${foodPoint.x}_y${foodPoint.y}`].classList.add('food');
-    }
+    },
+    
+    setScore(params) {
+        let scoreBlock = document.querySelector('#score');
+        scoreBlock.innerHTML = params.score;
+        scoreBlock.style.color = params.color;        
+    },
+    
 };

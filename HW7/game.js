@@ -29,17 +29,30 @@ let game = {
         this.stop();
         this.snake.init(this.getStartSnakePoint(), 'up');
         this.food.setFoodCoordinates(this.getRandomCoordinates());
+        this.status.resetScore();
         this.render();
     },
 
     render() {
         this.renderer.render(this.snake.body, this.food.getFoodCoordinates());
+        this.renderer.setScore(this.makeScoreContent());
     },
 
     play() {
         this.status.setPlaying();
-        this.tickInterval = setInterval( () => game.tickHandler(), 1000 / this.settings.speed);
+        this.setTicker();
         this.changePlayButton('Стоп');
+    },
+    
+    setTicker() {
+        let k = this.status.speedMultiplexor
+        clearInterval(this.tickInterval);
+        this.tickInterval = setInterval( () => game.tickHandler(), 1000.0 / (k*this.settings.speed));
+    },
+    
+    increaseSnakeSpeed() {
+        this.status.speedMultiplexor += 0.5;
+        this.setTicker();
     },
 
     tickHandler() {
@@ -49,8 +62,10 @@ let game = {
         }
 
         if(this.food.isFoodPoint(this.snake.getNextStepHeadPoint())) {
+            this.status.increaseScore();
             this.snake.incrementBody();
             this.food.setFoodCoordinates(this.getRandomCoordinates());
+            this.increaseSnakeSpeed();
             if(this.isGameWon()) {
                 this.finish();
             }
@@ -63,6 +78,10 @@ let game = {
     isGameWon() {
         return this.snake.body.length >= this.settings.winLength;
     },
+    
+    isGameLoosed() {
+        return  this.status.isFinished() && this.snake.body.length < this.settings.winLength;
+    },
 
     finish() {
         //ставим статус в финиш
@@ -71,6 +90,7 @@ let game = {
         clearInterval(this.tickInterval);
         //меняем кнопку игры, сделаем серой и напишем игра закончена
         this.changePlayButton('Игра закончена', true);
+        this.render();
     },
 
     stop() {
@@ -177,9 +197,22 @@ let game = {
             nextHeadPoint.x >= 0 &&
             nextHeadPoint.y >= 0;
     },
+    
+    makeScoreContent() {
+        let color = "black";
+        let content = `Счёт: ${this.status.score}/${this.settings.winLength - 1}`;
+        if (this.isGameWon()) {
+            content += '<br>Вы выиграли! 🙃';     
+            color = "green";
+        } else if (this.isGameLoosed()) {
+            content += '<br>Вы проиграли! 😔';
+            color = "red";
+        }
+        return {score: content, color: color};
+    }
 };
 
 window.onload = function () {
-    game.init({speed: 3, winLength: 5});
+    game.init({speed: 2, winLength: 10});
 };
 
