@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HW</title>
+    <style>
+        .wrapper {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .circle, 
+        .parallelogram, 
+        .trangle {
+            text-align: right;
+        }
+        
+        label {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <form action="#">
+        <div class="wrapper">
+            <div class="circle">
+                <span>Circle</span>
+                <label for="radius">R
+                    <input type="text" id="radius">  
+                </label>  
+            </div>
+            <div class="parallelogram">
+                <span>Parallelogram</span>
+                <label for="width">Width
+                    <input type="text" id="width"> 
+                </label>
+                <label for="height">Height
+                    <input type="text" id="height"> 
+                </label>  
+            </div>
+            <div class="trangle">
+               <span>Trangle</span>
+                <label for="a">First side
+                    <input type="text" id="a">
+                </label>
+                <label for="b">Second side
+                    <input type="text" id="b">
+                </label>
+                <label for="c">Third side
+                    <input type="text" id="c">
+                </label>
+            </div>
+        </div>
+        <button>Calculate area</button>   
+    </form>
+    <script>
+        //#1
+        console.log('#1');
+        function loop(times = 0, callback = null) {
+            if(callback !== null) {
+                for(let i = 0; i < times; i++) {
+                    callback();
+                }    
+            } else {
+                console.log(`Error! Callback is null`);
+            }
+        }
+        
+        function writeSmth() {
+            console.log('Write');
+        };
+        
+        loop(3, writeSmth);
+        loop(5);
+        
+        //#2
+        console.log('#2');
+        function isCircle(r) {
+            if (r > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        function isParallelogram(w, h) {
+            if (w > 0 && h > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        function isTrangle(a, b, c) {
+            if(a > 0 && b > 0 && c > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        function calculateArea(r, h, w, a, b, c) {
+            let answer = {};
+            let figures = [];
+            if (isCircle(r)) {
+                figures.push('circle');
+            };
+            if (isParallelogram(w,h)) {
+                figures.push('parallelogram');
+            };
+            if (isTrangle(a,b,c)) {
+                figures.push('trangle');
+            };
+            if(figures.length == 1) {
+                answer.figure = figures[0];
+                switch (answer.figure) {
+                    case 'circle': 
+                        answer.input = r;
+                        answer.area = Math.PI * Math.pow(r, 2);
+                        break;
+                    case 'parallelogram':
+                        answer.input = `${w}, ${h}`;
+                        answer.area = w * h;
+                        break;
+                    case 'trangle': 
+                        answer.input = `${a}, ${b}, ${c}`;
+                        if(a < b + c && b < a + c && c < a + b) {
+                            let p = a + b + c;
+                            answer.area = Math.sqrt(p * (p - a) * (p - b) * (p - c), 2);    
+                        } else {
+                            console.log(`Trangle with sides ${a}, ${b}, ${c} does not exist`);
+                            answer.area = 'error';
+                        }
+                        break;
+                };
+            } else {
+                console.log('error');
+            }
+            
+            console.table(answer);
+        }
+        document.querySelector('button').addEventListener('click', () => {
+            let R = document.querySelector('#radius').value;
+            let Height = document.querySelector('#height').value;
+            let Width = document.querySelector('#width').value;
+            let a = document.querySelector('#a').value;
+            let b = document.querySelector('#b').value;
+            let c = document.querySelector('#c').value;
+            calculateArea(R, Height, Width, a, b, c);
+        })
+        
+        //#3
+        console.log('#3');
+        class Human {
+            constructor(name, age, dateOfBirth) {
+                this.name = name;
+                this.age = age;
+                this.dateOfBirth = dateOfBirth;
+            };
+            displayInfo() {
+                return `name: ${this.name}, age: ${this.age}, dateOfBirth: ${dateOfBirth}`;
+            }
+        }
+        
+        class Employee extends Human {
+            constructor(name, age, dateOfBirth, salary, department) {
+                super(name, age, dateOfBirth);
+                this.salary = salary;
+                this.department = department;    
+            };
+            displayInfo() {
+                return super.displayInfo() + `, salary: ${this.salary}, department: ${this.department}`;
+            }
+        }
+        
+        class Developer extends Employee {
+            constructor(name, age, dateOfBirth, salary, department, manager) {
+                super(name, age, dateOfBirth, salary, department);
+                this.manager = manager;
+                manager.addDeveloper(this);
+            };
+            changeManager(newManager) {
+                this.manager.removeDeveloper(this);
+                this.manager = newManager;
+                newManager.addDeveloper(this);
+            }
+        }
+        
+        class Manager extends Employee {
+            constructor(name, age, dateOfBirth, salary, department) {
+                super(name, age, dateOfBirth, salary, department);
+                this.developers = [];
+            };
+            addDeveloper(newDeveloper) {
+                this.developers.push(newDeveloper);
+                newDeveloper.manager = this;
+            };
+            removeDeveloper(Developer) {
+                let idx = this.developers.indexOf(Developer);
+                this.developers.splice(idx, 1);
+                Developer.manager = '';
+            }    
+        }
+        
+        //#5
+        console.log('#5')
+        const fetchArray = [];
+        for(let i = 1; i < 11; i++) {
+            fetchArray[i - 1] = fetch(`https://jsonplaceholder.typicode.com/users/${i}`);
+        }
+        Promise.all(fetchArray).then((result) => {
+            let bodyPromisies = [];
+            result.forEach(item => bodyPromisies.push(item.text()));
+            Promise.all(bodyPromisies).then((bodies) => {
+                bodies.forEach(item => console.log(JSON.parse(item)));
+            })
+        })
+    </script>
+</body>
+</html>
